@@ -14,40 +14,75 @@ namespace LINQtraining
         static void Main(string[] args)
         {
             using var context = new LINQtrainingContext();
+            string MenuChoice = "";
+            MainMenu(context, MenuChoice);
+        }
+
+        private static void MainMenu(LINQtrainingContext context, string MenuChoice)
+        {
             Console.WriteLine("1. Hämta alla studenter\n2. Hämta alla studenter i en viss klass\n3. Lägga till nya studenter\n4. Hämta personal\n5. Lägga till ny personal");
-            string MenuChoice = Console.ReadLine();
+            MenuChoice = Console.ReadLine();
 
             switch (MenuChoice)
             {
                 case "1":
+                    Console.Clear();
                     GetStudents(context);
+                    Console.WriteLine("press any key to continue..");
                     Console.ReadKey();
+                    Console.Clear();
+                    MainMenu(context, MenuChoice);
                     break;
 
                 case "2":
+                    Console.Clear();
                     GetFilteredStudents(context);
+                    Console.WriteLine("press any key to continue..");
                     Console.ReadKey();
+                    Console.Clear();
+                    MainMenu(context, MenuChoice);
                     break;
 
                 case "3":
+                    Console.Clear();
                     AddStudent(context);
+                    Console.WriteLine("press any key to continue..");
                     Console.ReadKey();
+                    Console.Clear();
+                    MainMenu(context, MenuChoice);
                     break;
 
                 case "4":
+                    Console.Clear();
                     JobFilterMenuMethod(context);
+                    Console.WriteLine("press any key to continue..");
+                    Console.ReadKey();
+                    Console.Clear();
+                    MainMenu(context, MenuChoice);
                     break;
 
                 case "5":
+                    Console.Clear();
                     AddEmployee(context);
+                    Console.WriteLine("press any key to continue..");
+                    Console.ReadKey();
+                    Console.Clear();
+                    MainMenu(context, MenuChoice);
                     break;
 
                 default:
-                    Console.WriteLine("Ogiltigt val");
+                    Console.Clear();
+                    Console.WriteLine("Unexpected input");
+                    Console.WriteLine("press any key to continue..");
+                    Console.ReadKey();
+                    Console.Clear();
+                    MainMenu(context, MenuChoice);
                     break;
             }
         }
 
+        //some of these methods are called "get" but they also print to console, which is their primary use for clarification.
+        //they should also more or less all be in a "helper" class but for simplicity they are here since this is a small project.
         private static void JobFilterMenuMethod(LINQtrainingContext context)
         {
             Console.WriteLine("1. Print all Personell\n2. Print by job post");
