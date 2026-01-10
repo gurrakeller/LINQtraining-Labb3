@@ -15,6 +15,8 @@ public partial class Grade
 
     public int EmployeeId { get; set; }
 
+    public DateOnly GradeDate { get; set; }
+
     public virtual Course Course { get; set; } = null!;
 
     public virtual Employee Employee { get; set; } = null!;

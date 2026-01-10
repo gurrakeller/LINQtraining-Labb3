@@ -28,7 +28,7 @@ public partial class LINQtrainingContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=GURRA;Database=LINQtraining;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Data Source=GURRA;Database = LINQtraining;Initial Catalog=LINQtraining;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +56,11 @@ public partial class LINQtrainingContext : DbContext
 
             entity.Property(e => e.CourseId).HasColumnName("CourseID");
             entity.Property(e => e.CourseName).HasMaxLength(100);
+            entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.Courses)
+                .HasForeignKey(d => d.EmployeeId)
+                .HasConstraintName("FK__Course__Employee__5AEE82B9");
         });
 
         modelBuilder.Entity<Employee>(entity =>
@@ -82,6 +87,7 @@ public partial class LINQtrainingContext : DbContext
             entity.Property(e => e.CourseId).HasColumnName("CourseID");
             entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
             entity.Property(e => e.Grade1).HasColumnName("Grade");
+            entity.Property(e => e.GradeDate).HasDefaultValueSql("(getdate())", "DF_Grade_GradeDate");
             entity.Property(e => e.StudentId).HasColumnName("StudentID");
 
             entity.HasOne(d => d.Course).WithMany(p => p.Grades)

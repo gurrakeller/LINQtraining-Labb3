@@ -11,7 +11,9 @@ namespace LINQtraining
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] args) //IMPORTANT FOR ANYONE WHO FOUND THIS THROUGH GITHUB! When youre reading this its important to me that you know that I am aware that this is not the most efficient way to structure a program.
+                                        //Infact program should only hold the entry point of the programme and the rest should be in separate classes/helper classes, but due to the nature of the 
+                                        //assignment and for simplicity i have kept everything in one file.
         {
             using var context = new LINQtrainingContext();
             string MenuChoice = "";
@@ -20,7 +22,7 @@ namespace LINQtraining
 
         private static void MainMenu(LINQtrainingContext context, string MenuChoice)
         {
-            Console.WriteLine("1. Hämta alla studenter\n2. Hämta alla studenter i en viss klass\n3. Lägga till nya studenter\n4. Hämta personal\n5. Lägga till ny personal");
+            Console.WriteLine("1. Hämta alla studenter\n2. Hämta alla studenter i en viss klass\n3. Lägga till nya studenter\n4. Hämta personal\n5. Lägga till ny personal\n6. Labb 4\n7. EXIT");
             MenuChoice = Console.ReadLine();
 
             switch (MenuChoice)
@@ -45,7 +47,6 @@ namespace LINQtraining
 
                 case "3":
                     Console.Clear();
-                    AddStudent(context);
                     Console.WriteLine("press any key to continue..");
                     Console.ReadKey();
                     Console.Clear();
@@ -70,6 +71,20 @@ namespace LINQtraining
                     MainMenu(context, MenuChoice);
                     break;
 
+                case "6":
+                    Console.Clear();
+                    //TODO: Labb 4 metoder här
+                    Labb4Menu(context, MenuChoice);
+                    Console.WriteLine("press any key to continue..");
+                    Console.ReadKey();
+                    Console.Clear();
+                    MainMenu(context, MenuChoice);
+                    break;
+
+                case "7":
+                    Console.Clear();
+                    break;
+
                 default:
                     Console.Clear();
                     Console.WriteLine("Unexpected input");
@@ -82,7 +97,6 @@ namespace LINQtraining
         }
 
         //some of these methods are called "get" but they also print to console, which is their primary use for clarification.
-        //they should also more or less all be in a "helper" class but for simplicity they are here since this is a small project.
         private static void JobFilterMenuMethod(LINQtrainingContext context)
         {
             Console.WriteLine("1. Print all Personell\n2. Print by job post");
@@ -103,7 +117,6 @@ namespace LINQtraining
                     {
                         Console.WriteLine($"{fe.FirstName} {fe.LastName} - {fe.EmployeePost}");
                     }
-                    Console.ReadKey();
                     break;
                 default:
                     Console.WriteLine("Ogiltigt val");
@@ -131,7 +144,8 @@ namespace LINQtraining
                 .Where(fs => fs.ClassId == classChoice)
                 .ToList();
 
-            foreach (var fs in filteredStudents) { 
+            foreach (var fs in filteredStudents)
+            {
                 Console.WriteLine(fs.ClassName);
                 foreach (var s in fs.Students)
                 {
@@ -149,7 +163,7 @@ namespace LINQtraining
                 Console.WriteLine();
             }
         }
-        
+
         private static void AddEmployee(LINQtrainingContext context)
         {
             Console.WriteLine("First Name: ");
@@ -169,23 +183,126 @@ namespace LINQtraining
             Console.WriteLine("Employee added successfully.");
         }
 
-        private static void AddStudent(LINQtrainingContext context)
+        //------------------------------LABB 4------------------------------------------
+        private static void Labb4Menu(LINQtrainingContext context, string Labb4MenuChoice)
         {
-            Console.WriteLine("First Name: ");
-            string firstName = Console.ReadLine();
-            Console.WriteLine("Last Name: ");
-            string lastName = Console.ReadLine();
-            Console.WriteLine("Ssn: ");
-            int ssn = int.Parse(Console.ReadLine());
+            Console.WriteLine("1. Count teachers per post (i assume this is what you mean by avdelning?) " +
+                "\n2. Students in specific class\n3. Show active courses\n4. EXIT\n5. TODO: Sätt betyg på en student genom att använda Transactions ifall något går fel.");
+            Labb4MenuChoice = Console.ReadLine();
+            switch (Labb4MenuChoice)
             {
-                FirstName = firstName,
-                LastName = lastName,
-                Ssn = ssn
-            };
-            context.Students.Add(newStudent);
-            context.SaveChanges();
-            Console.WriteLine("Student added successfully.");
+                case "1":
+                    Console.Clear();
+                    CountTeachersPerPost(context);
+                    Console.WriteLine("press any key to continue..");
+                    Console.ReadKey();
+                    Console.Clear();
+                    Labb4Menu(context, Labb4MenuChoice);
+                    break;
+                case "2":
+                    Console.Clear();
+                    ClassSpecificStudents(context);
+                    Console.WriteLine("press any key to continue..");
+                    Console.ReadKey();
+                    Console.Clear();
+                    Labb4Menu(context, Labb4MenuChoice);
+                    break;
+                case "3":
+                    Console.Clear();
+                    PrintActiveCourses(context);
+                    break;
+
+                case "4":
+                    Console.Clear();
+
+                    break;
+
+                default:
+                    Console.Clear();
+                    Console.WriteLine("Unexpected input");
+                    Console.WriteLine("press any key to continue..");
+                    Console.ReadKey();
+                    Console.Clear();
+                    Labb4Menu(context, Labb4MenuChoice);
+                    break;
+            }
+        }
+
+        private static void CountTeachersPerPost(LINQtrainingContext context)
+        {
+            var teacherCounts = context.Employees
+                .GroupBy(e => e.EmployeePost)
+                .Select(g => new
+                {
+                    JobPost = g.Key,
+                    Count = g.Count()
+                })
+                .ToList();
+            foreach (var tc in teacherCounts)
+            {
+                Console.WriteLine($"{tc.JobPost}: {tc.Count}");
+            }
+        }
+
+        private static void ClassSpecificStudents(LINQtrainingContext context)
+        {
+            Console.WriteLine("What class would you like to check?");
+            int classId = int.Parse(Console.ReadLine());
+
+            var students = context.Students
+                .Where(s => s.Classes.Any(c => c.ClassId == classId))
+                .Select(s => new
+                {
+                    StudentName = s.FirstName + " " + s.LastName, //<-- matar bara in hela namnet ist så slipper jag krånga med cw'n här nere, ser dock lite konstigt ut för man måste göra ett manuellt mellanrun X(
+                    Courses = s.Grades.Select(g => new
+                    {
+                        CourseName = g.Course.CourseName,
+                        Grade = g.Grade1
+                    })
+                })
+                .ToList();
+
+            foreach (var student in students)
+            {
+                Console.WriteLine(student.StudentName);
+
+                foreach (var course in student.Courses)
+                {
+                    Console.WriteLine($"  {course.CourseName}: {course.Grade}");
+                }
+
+                Console.WriteLine();
+            }
+        }
+
+        private static void PrintActiveCourses(LINQtrainingContext context)
+        {
+            var activeCourses = context.Courses
+                .Where(c => c.Students.Any())
+                .ToList();
+
+            Console.WriteLine("Current courses with students enrolled (i assume this is what you mean by active (?):");
+            foreach (var ac in activeCourses)
+                Console.WriteLine($"-{ac.CourseName}\n");
+        }
+        
+        private static void TransactionExample(LINQtrainingContext context)
+        {
+            using var transaction = context.Database.BeginTransaction();
+            try
+            {
+                // Example operations
+                // context.Students.Add(new Student { ... });
+                // context.SaveChanges();
+                // context.Grades.Add(new Grade { ... });
+                // context.SaveChanges();
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                transaction.Rollback();
+            }
         }
     }
 }
-
