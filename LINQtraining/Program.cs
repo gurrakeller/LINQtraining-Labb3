@@ -177,7 +177,6 @@ namespace LINQtraining
             string lastName = Console.ReadLine();
             Console.WriteLine("Ssn: ");
             int ssn = int.Parse(Console.ReadLine());
-            Student newStudent = new Student
             {
                 FirstName = firstName,
                 LastName = lastName,
