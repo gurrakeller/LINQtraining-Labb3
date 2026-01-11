@@ -215,8 +215,6 @@ namespace LINQtraining
                 case "4":
                     Console.Clear();
                     SetStudentGradeFromConsoleAsync(context).Wait();
-                    Console.WriteLine("press any key to continue..");
-                    Console.ReadKey();
                     Labb4Menu(context, Labb4MenuChoice);
                     Console.Clear();
                     break;
@@ -340,6 +338,10 @@ namespace LINQtraining
                 if (newGrade != null)
                 {
                     newGrade.Grade1 = Grade1;
+                    Console.WriteLine("succeeded in updating existing grade");
+                    Console.WriteLine("Press any key to continue..");
+                    Console.ReadLine();
+                    Console.Clear();
                 }
                 else
                 {
@@ -351,6 +353,10 @@ namespace LINQtraining
                         EmployeeId = 1,
                         GradeDate = DateOnly.FromDateTime(DateTime.Now)
                     });
+                    Console.WriteLine("succeeded in adding new grade");
+                    Console.WriteLine("Press any key to continue..");
+                    Console.ReadLine();
+                    Console.Clear();
                 }
             }
             catch (Exception ex)
