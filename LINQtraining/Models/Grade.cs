@@ -7,7 +7,8 @@ public partial class Grade
 {
     public int GradeId { get; set; }
 
-    public int Grade1 { get; set; }
+    public int Grade1 { get; set; } //This is the grade value 1-5 e.g the old grading system. in the database i set is as simply "grade" but for some reason vs didnt like that so it set it as grade1 instead. 
+    //realize now that i could have set it to something like gradevalue instead of grade but oh well.
 
     public int StudentId { get; set; }
 

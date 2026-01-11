@@ -187,7 +187,7 @@ namespace LINQtraining
         private static void Labb4Menu(LINQtrainingContext context, string Labb4MenuChoice)
         {
             Console.WriteLine("1. Count teachers per post (i assume this is what you mean by avdelning?) " +
-                "\n2. Students in specific class\n3. Show active courses\n4. EXIT\n5. TODO: Sätt betyg på en student genom att använda Transactions ifall något går fel.");
+                "\n2. Students in specific class\n3. Show active courses\n4. Add student grade\n5. Back to main menu\n6. EXIT");
             Labb4MenuChoice = Console.ReadLine();
             switch (Labb4MenuChoice)
             {
@@ -214,7 +214,21 @@ namespace LINQtraining
 
                 case "4":
                     Console.Clear();
+                    SetStudentGradeFromConsoleAsync(context).Wait();
+                    Console.WriteLine("press any key to continue..");
+                    Console.ReadKey();
+                    Labb4Menu(context, Labb4MenuChoice);
+                    Console.Clear();
+                    break;
 
+                case "5":
+                    string MenuChoice = "";
+                    Console.Clear();
+                    MainMenu(context, MenuChoice);
+                    break;
+
+                case "6":
+                    Console.Clear();
                     break;
 
                 default:
@@ -285,23 +299,65 @@ namespace LINQtraining
             foreach (var ac in activeCourses)
                 Console.WriteLine($"-{ac.CourseName}\n");
         }
-        
-        private static void TransactionExample(LINQtrainingContext context)
+
+        private static async Task SetStudentGradeFromConsoleAsync(LINQtrainingContext context)
         {
+            Console.Write("Student ID: ");
+            if (!int.TryParse(Console.ReadLine(), out int studentId))
+            {
+                Console.WriteLine("Invalid Student ID.");
+                return;
+            }
+
+            Console.Write("Course ID: ");
+            if (!int.TryParse(Console.ReadLine(), out int courseId))
+            {
+                Console.WriteLine("Invalid Course ID.");
+                return;
+            }
+
+            Console.Write("Grade: ");
+            if (!int.TryParse(Console.ReadLine(), out int grade))
+            {
+                Console.WriteLine("Invalid grade.");
+                return;
+            }
+            await AddGradeWithTransaction(context, studentId, courseId, grade);
+        }
+
+        private static async Task AddGradeWithTransaction(LINQtrainingContext context, int StudentID, int courseID, int Grade1)
+        {
+            //made it async so we can use await to check if there already exists a grade, and in that case edit that one instead of creating a new one risking douplicate grades.
+            //also so i can seperate the info gathering from console and the actual transaction logic. And yes i realise i shoudev done this in the entire thing
+            //but realistically only you will be seeing this anyways Aldor so i guess its fine x(.
+            //Its now 03:00 and im tired ok leave me alone. Atleast with this i hope im finally caught up again.
             using var transaction = context.Database.BeginTransaction();
+
             try
             {
-                // Example operations
-                // context.Students.Add(new Student { ... });
-                // context.SaveChanges();
-                // context.Grades.Add(new Grade { ... });
-                // context.SaveChanges();
-                transaction.Commit();
+                var newGrade = await context.Grades
+                    .FirstOrDefaultAsync(g => g.StudentId == StudentID && g.CourseId == courseID);
+                if (newGrade != null)
+                {
+                    newGrade.Grade1 = Grade1;
+                }
+                else
+                {
+                    context.Grades.Add(new Grade
+                    {
+                        StudentId = StudentID,
+                        CourseId = courseID,
+                        Grade1 = Grade1,
+                        EmployeeId = 1,
+                        GradeDate = DateOnly.FromDateTime(DateTime.Now)
+                    });
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
                 transaction.Rollback();
+                return;
             }
         }
     }
